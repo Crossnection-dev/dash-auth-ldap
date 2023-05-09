@@ -1,6 +1,7 @@
 from .auth import Auth
 import base64
 import flask
+import ldap
 
 
 class BasicAuth(Auth):
@@ -19,7 +20,14 @@ class BasicAuth(Auth):
         username_password = base64.b64decode(header.split('Basic ')[1])
         username_password_utf8 = username_password.decode('utf-8')
         username, password = username_password_utf8.split(':', 1)
-        return self._users.get(username) == password
+        conn = ldap.initialize('ldap://192.168.10.25')
+        try:
+            conn.simple_bind_s(
+                f'cn={username},ou=Service Account,ou=ADMIN,ou=GROUP,dc=COSMO,dc=local', password
+            )
+            return True
+        except:
+            return False
 
     def login_request(self):
         return flask.Response(
