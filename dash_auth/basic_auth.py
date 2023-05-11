@@ -27,7 +27,8 @@ class BasicAuth(Auth):
                 f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
             )
             bind_cross = True
-        except:
+        except Exception as e:
+            print('Impossibile effettuare il bind ', e)
             bind_cross = False
         #Utenza Cosmo
         try:
@@ -35,7 +36,8 @@ class BasicAuth(Auth):
                 f'cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
             )
             bind_cosmo = True
-        except:
+        except Exception as e:
+            print('Impossibile effettuare il bind ', e)
             bind_cosmo = False
         #Ricerca utenza Crossnection nel gruppo di sicurezza
         try:
@@ -44,7 +46,8 @@ class BasicAuth(Auth):
                 ldap.SCOPE_SUBTREE, 
                 f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
             )
-        except:
+        except Exception as e:
+            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
             cross_in_group = False
         #Ricerca utenza Cosmo nel gruppo di sicurezza
         try:
@@ -53,7 +56,8 @@ class BasicAuth(Auth):
                 ldap.SCOPE_SUBTREE, 
                 f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
             )
-        except:
+        except Exception as e:
+            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
             cosmo_in_group = False
         conn.unbind_s()
         if (bind_cross and cross_in_group) or (bind_cosmo and cosmo_in_group):
