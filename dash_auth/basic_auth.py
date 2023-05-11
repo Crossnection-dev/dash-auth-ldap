@@ -21,24 +21,42 @@ class BasicAuth(Auth):
         username_password_utf8 = username_password.decode('utf-8')
         username, password = username_password_utf8.split(':', 1)
         conn = ldap.initialize('ldap://192.168.10.25')
-        # zuser1 Cosmo2023
+        #Utenza Crossnection: zuser1 Cosmo2023
         try:
             conn.simple_bind_s(
                 f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
             )
-            bind = True
+            bind_cross = True
         except:
-            bind = False
+            bind_cross = False
+        #Utenza Cosmo
         try:
-            user_in_group = conn.search_s(
+            conn.simple_bind_s(
+                f'cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
+            )
+            bind_cosmo = True
+        except:
+            bind_cosmo = False
+        #Ricerca utenza Crossnection nel gruppo di sicurezza
+        try:
+            cross_in_group = conn.search_s(
                 'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
                 ldap.SCOPE_SUBTREE, 
                 f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
             )
         except:
-            user_in_group = False
+            cross_in_group = False
+        #Ricerca utenza Cosmo nel gruppo di sicurezza
+        try:
+            cosmo_in_group = conn.search_s(
+                'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
+                ldap.SCOPE_SUBTREE, 
+                f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
+            )
+        except:
+            cosmo_in_group = False
         conn.unbind_s()
-        if bind and user_in_group:
+        if (bind_cross and cross_in_group) or (bind_cosmo and cosmo_in_group):
             return True
         else:
             return False
