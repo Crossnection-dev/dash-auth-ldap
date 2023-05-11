@@ -28,7 +28,7 @@ class BasicAuth(Auth):
             )
             bind_cross = True
         except Exception as e:
-            print('Impossibile effettuare il bind ', e)
+            print('Impossibile effettuare il bind cross', e)
             bind_cross = False
         #Utenza Cosmo
         try:
@@ -37,27 +37,35 @@ class BasicAuth(Auth):
             )
             bind_cosmo = True
         except Exception as e:
-            print('Impossibile effettuare il bind ', e)
+            print('Impossibile effettuare il bind cosmo ', e)
             bind_cosmo = False
         #Ricerca utenza Crossnection nel gruppo di sicurezza
         try:
-            cross_in_group = conn.search_s(
+            cross_in_group_search = conn.search_s(
                 'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
                 ldap.SCOPE_SUBTREE, 
                 f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
             )
+            if cross_in_group_search:
+                cross_in_group = True
+            else:
+                cross_in_group = False
         except Exception as e:
-            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
+            print('Impossibile effettuare la ricerca cross nel gruppo di sicurezza ', e)
             cross_in_group = False
         #Ricerca utenza Cosmo nel gruppo di sicurezza
         try:
-            cosmo_in_group = conn.search_s(
+            cosmo_in_group_search = conn.search_s(
                 'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
                 ldap.SCOPE_SUBTREE, 
                 f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
             )
+            if cosmo_in_group_search:
+                cosmo_in_group = True
+            else:
+                cosmo_in_group = False
         except Exception as e:
-            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
+            print('Impossibile effettuare la ricerca cosmo nel gruppo di sicurezza ', e)
             cosmo_in_group = False
         conn.unbind_s()
         if (bind_cross and cross_in_group) or (bind_cosmo and cosmo_in_group):
