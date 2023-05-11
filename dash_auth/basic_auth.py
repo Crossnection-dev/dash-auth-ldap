@@ -21,10 +21,10 @@ class BasicAuth(Auth):
         username_password_utf8 = username_password.decode('utf-8')
         username, password = username_password_utf8.split(':', 1)
         conn = ldap.initialize('ldap://192.168.10.25')
-        # lai-sa-cross TE4mz1eE2b0Y
+        # zuser1 Cosmo2023
         try:
             conn.simple_bind_s(
-                f'cn={username},ou=Service Account,ou=ADMIN,ou=GROUP,dc=COSMO,dc=local', password
+                f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
             )
             return True
         except:
