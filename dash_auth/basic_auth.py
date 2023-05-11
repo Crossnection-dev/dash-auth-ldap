@@ -26,8 +26,21 @@ class BasicAuth(Auth):
             conn.simple_bind_s(
                 f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
             )
-            return True
+            bind = True
         except:
+            bind = False
+        try:
+            user_in_group = conn.search_s(
+                'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
+                ldap.SCOPE_SUBTREE, 
+                f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
+            )
+        except:
+            user_in_group = False
+        conn.unbind_s()
+        if bind and user_in_group:
+            return True
+        else:
             return False
 
     def login_request(self):
