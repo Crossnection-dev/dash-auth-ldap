@@ -21,54 +21,39 @@ class BasicAuth(Auth):
         username_password_utf8 = username_password.decode('utf-8')
         username, password = username_password_utf8.split(':', 1)
         conn = ldap.initialize('ldap://192.168.10.25')
+        if username == 'zuser1':
+            bind_path = f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local'
+            user_query = f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
+        else:
+            bind_path = f'cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local'
+            user_query = f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
+
         #Utenza Crossnection: zuser1 Cosmo2023
         try:
             conn.simple_bind_s(
-                f'cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
+                bind_path, password
             )
-            bind_cross = True
+            bind = True
         except Exception as e:
-            print('Impossibile effettuare il bind cross', e)
-            bind_cross = False
-        #Utenza Cosmo
-        try:
-            conn.simple_bind_s(
-                f'cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local', password
-            )
-            bind_cosmo = True
-        except Exception as e:
-            print('Impossibile effettuare il bind cosmo ', e)
-            bind_cosmo = False
+            print('Impossibile effettuare il bind', e)
+            bind = False
         #Ricerca utenza Crossnection nel gruppo di sicurezza
         try:
-            cross_in_group_search = conn.search_s(
+            user_in_group_search = conn.search_s(
                 'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
                 ldap.SCOPE_SUBTREE, 
-                f'(&(objectClass=*)(member=cn={username},ou=z Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
+                user_query
             )
-            if cross_in_group_search:
-                cross_in_group = True
+            if user_in_group_search:
+                user_in_group = True
             else:
-                cross_in_group = False
+                user_in_group = False
         except Exception as e:
-            print('Impossibile effettuare la ricerca cross nel gruppo di sicurezza ', e)
-            cross_in_group = False
-        #Ricerca utenza Cosmo nel gruppo di sicurezza
-        try:
-            cosmo_in_group_search = conn.search_s(
-                'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
-                ldap.SCOPE_SUBTREE, 
-                f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
-            )
-            if cosmo_in_group_search:
-                cosmo_in_group = True
-            else:
-                cosmo_in_group = False
-        except Exception as e:
-            print('Impossibile effettuare la ricerca cosmo nel gruppo di sicurezza ', e)
-            cosmo_in_group = False
+            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
+            user_in_group = False
+
         conn.unbind_s()
-        if (bind_cross and cross_in_group) or (bind_cosmo and cosmo_in_group):
+        if bind and user_in_group:
             return True
         else:
             return False
