@@ -35,7 +35,7 @@ class BasicAuth(Auth):
             )
             bind = True
         except Exception as e:
-            print('Impossibile effettuare il bind', e)
+            print('Impossibile effettuare il bind', e, flush = True)
             bind = False
         #Ricerca utenza nel gruppo di sicurezza
         try:
@@ -49,7 +49,7 @@ class BasicAuth(Auth):
             else:
                 user_in_group = False
         except Exception as e:
-            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e)
+            print('Impossibile effettuare la ricerca nel gruppo di sicurezza ', e, flush = True)
             user_in_group = False
 
         conn.unbind_s()
