@@ -28,7 +28,7 @@ class BasicAuth(Auth):
             bind_path = f'cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local'
             user_query = f'(&(objectClass=*)(member=cn={username},ou=Users,ou=USERS,ou=GROUP,dc=COSMO,dc=local))'
 
-        #Utenza Crossnection: zuser1 Cosmo2023
+        #Verifica credenziali utenza (utenza test: zuser1 Cosmo2023)
         try:
             conn.simple_bind_s(
                 bind_path, password
@@ -37,7 +37,7 @@ class BasicAuth(Auth):
         except Exception as e:
             print('Impossibile effettuare il bind', e)
             bind = False
-        #Ricerca utenza Crossnection nel gruppo di sicurezza
+        #Ricerca utenza nel gruppo di sicurezza
         try:
             user_in_group_search = conn.search_s(
                 'cn=LAI-P-CrossNova,ou=CrossNova,ou=Prod Apps,ou=Security Group,ou=CSM - Cosmo Spa,ou=EU - Lainate,ou=SITES,ou=GROUP,dc=COSMO,dc=LOCAL', 
